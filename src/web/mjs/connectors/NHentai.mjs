@@ -31,9 +31,29 @@ export default class NHentai extends Connector {
         return [ Object.assign({ language: '' }, manga) ];
     }
 
+    // //ORIGINAL
+    // async _getPages(chapter) {
+    //     let request = new Request( this.url + chapter.id, this.requestOptions );
+    //     const data = await this.fetchDOM(request, 'div#thumbnail-container a.gallerythumb source.lazyload');
+    //     return data.map(element => element.dataset.src.replace('t.', 'i.').replace(/\/t/g, '/i'));
+    // }
+
+    //VERSION 2
     async _getPages(chapter) {
         let request = new Request( this.url + chapter.id, this.requestOptions );
         const data = await this.fetchDOM(request, 'div#thumbnail-container a.gallerythumb source.lazyload');
-        return data.map(element => element.dataset.src.replace('t.', 'i.').replace(/\/t/g, '/i'));
+
+        return data.map(element => {
+            let src = element.dataset.src;
+
+            //Handle relative URLs
+            if (src.startsWith('//')) {
+                src = 'https:' + src;
+            } else if (src.startsWith('/')) {
+                src = this.url + src;
+            }
+
+            return src;
+        });
     }
 }
